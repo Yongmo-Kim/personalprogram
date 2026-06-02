@@ -1,0 +1,14 @@
+<svg width="512" height="196" viewBox="0 0 512 196" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="196" rx="18" fill="white"/>
+  <g transform="translate(126 30)">
+    <path d="M26 0C50 13 64 31 62 55C60 80 42 98 16 111L0 2L26 0Z" fill="#F37000"/>
+    <path d="M77 21C105 29 128 45 145 67L79 98C61 77 57 51 77 21Z" fill="#F37000"/>
+    <path d="M40 29C58 37 70 51 70 68C52 66 38 57 29 42C32 37 35 33 40 29Z" fill="#E6002D"/>
+    <path d="M79 66C100 70 116 79 128 92L78 116C70 99 70 82 79 66Z" fill="#E6002D"/>
+    <path d="M17 57C31 64 38 76 37 90C27 101 14 109 0 114L-5 80C0 70 8 62 17 57Z" fill="#E6002D"/>
+  </g>
+  <g font-family="Arial, Helvetica, sans-serif" font-weight="800">
+    <text x="34" y="146" font-size="78" letter-spacing="-3" fill="#E6002D">SK</text>
+    <text x="210" y="146" font-size="72" letter-spacing="-2" fill="#F37000">hynix</text>
+  </g>
+</svg>

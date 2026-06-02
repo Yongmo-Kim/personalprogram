@@ -2,6 +2,7 @@ import process from 'node:process'
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+import { VitePWA } from 'vite-plugin-pwa'
 
 const JOB_CACHE_TTL_MS = 10 * 60 * 1000
 const jobCache = new Map()
@@ -446,6 +447,38 @@ export default defineConfig(({ mode }) => {
       tailwindcss(),
       newsAiSummaryPlugin(env),
       jobsApiPlugin(env),
+      VitePWA({
+        registerType: 'autoUpdate',
+        includeAssets: ['favicon.svg', 'icons.svg', 'icon-192.png', 'icon-512.png'],
+        manifest: {
+          name: 'Wortout Dashboard',
+          short_name: 'Wortout',
+          description: '개인 커리어 및 지능 정보 대시보드',
+          theme_color: '#0f172a',
+          background_color: '#0f172a',
+          display: 'standalone',
+          orientation: 'portrait',
+          start_url: '/',
+          icons: [
+            {
+              src: 'icon-192.png',
+              sizes: '192x192',
+              type: 'image/png'
+            },
+            {
+              src: 'icon-512.png',
+              sizes: '512x512',
+              type: 'image/png'
+            },
+            {
+              src: 'icon-512.png',
+              sizes: '512x512',
+              type: 'image/png',
+              purpose: 'any maskable'
+            }
+          ]
+        }
+      })
     ],
     server: { proxy },
     preview: { proxy },

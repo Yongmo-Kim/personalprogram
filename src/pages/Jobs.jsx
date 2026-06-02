@@ -23,30 +23,30 @@ import {
 } from '../services/jobsService';
 
 const STATUS_COLORS = {
-  interested: 'bg-blue-500/20 text-blue-300',
-  saved: 'bg-amber-500/20 text-amber-300',
-  applied: 'bg-emerald-500/20 text-emerald-300',
-  done: 'bg-primary/20 text-primary',
-  rejected: 'bg-slate-500/20 text-slate-300',
+  interested: 'bg-blue-50 dark:bg-blue-500/20 text-blue-600 dark:text-blue-300',
+  saved: 'bg-amber-50 dark:bg-amber-500/20 text-amber-600 dark:text-amber-300',
+  applied: 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-300',
+  done: 'bg-primary/10 dark:bg-primary/20 text-primary',
+  rejected: 'bg-slate-100 dark:bg-slate-500/20 text-slate-600 dark:text-slate-300',
 };
 
 const INDUSTRY_COLORS = {
-  semiconductor: 'bg-violet-500/20 text-violet-300',
-  defense: 'bg-rose-500/20 text-rose-300',
-  electronics: 'bg-sky-500/20 text-sky-300',
-  mobility: 'bg-cyan-500/20 text-cyan-300',
-  battery: 'bg-emerald-500/20 text-emerald-300',
-  communications: 'bg-blue-500/20 text-blue-300',
-  robotics: 'bg-orange-500/20 text-orange-300',
-  embedded: 'bg-teal-500/20 text-teal-300',
-  rnd: 'bg-amber-500/20 text-amber-300',
+  semiconductor: 'bg-violet-50 dark:bg-violet-500/20 text-violet-600 dark:text-violet-300',
+  defense: 'bg-rose-50 dark:bg-rose-500/20 text-rose-600 dark:text-rose-300',
+  electronics: 'bg-sky-50 dark:bg-sky-500/20 text-sky-600 dark:text-sky-300',
+  mobility: 'bg-cyan-50 dark:bg-cyan-500/20 text-cyan-600 dark:text-cyan-300',
+  battery: 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-300',
+  communications: 'bg-blue-50 dark:bg-blue-500/20 text-blue-600 dark:text-blue-300',
+  robotics: 'bg-orange-50 dark:bg-orange-500/20 text-orange-600 dark:text-orange-300',
+  embedded: 'bg-teal-50 dark:bg-teal-500/20 text-teal-600 dark:text-teal-300',
+  rnd: 'bg-amber-50 dark:bg-amber-500/20 text-amber-600 dark:text-amber-300',
 };
 
 const TYPE_COLORS = {
-  intern: 'bg-lime-500/20 text-lime-300',
-  newgrad: 'bg-cyan-500/20 text-cyan-300',
-  entry: 'bg-primary/20 text-primary',
-  experienced: 'bg-orange-500/20 text-orange-300',
+  intern: 'bg-lime-50 dark:bg-lime-500/20 text-lime-600 dark:text-lime-300',
+  newgrad: 'bg-cyan-50 dark:bg-cyan-500/20 text-cyan-600 dark:text-cyan-300',
+  entry: 'bg-primary/10 dark:bg-primary/20 text-primary',
+  experienced: 'bg-orange-50 dark:bg-orange-500/20 text-orange-600 dark:text-orange-300',
 };
 
 const loadStatuses = () => {
@@ -110,7 +110,7 @@ export const Jobs = () => {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-xl border border-primary/25 bg-primary/10 p-5">
+      <section className="rounded-xl border border-primary/15 dark:border-primary/25 bg-primary/5 dark:bg-primary/10 p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <div className="flex items-center gap-2 text-primary">

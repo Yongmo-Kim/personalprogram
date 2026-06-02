@@ -1,7 +1,12 @@
-import { NavLink, Outlet } from 'react-router-dom';
-import { Home, Briefcase, CalendarDays, Globe, Cpu, Settings, Shield } from 'lucide-react';
+import { useEffect } from 'react';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { Home, Briefcase, CalendarDays, Globe, Cpu, Settings, Shield, Sun, Moon, Laptop } from 'lucide-react';
+import { useTheme } from '../contexts/ThemeContext';
 
 export const Layout = () => {
+  const { theme, setTheme } = useTheme();
+  const navigate = useNavigate();
+
   const navItems = [
     { name: '홈', path: '/', icon: <Home size={20} /> },
     { name: '취업', path: '/jobs', icon: <Briefcase size={20} /> },
@@ -12,6 +17,45 @@ export const Layout = () => {
     { name: '설정', path: '/settings', icon: <Settings size={20} /> },
   ];
 
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // 1. Ctrl + K -> 검색 포커스
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        const searchInput = document.querySelector(
+          'input[type="search"], input[placeholder*="검색"], #job-keyword-search, input[placeholder*="Search"]'
+        );
+        if (searchInput) {
+          searchInput.focus();
+          searchInput.select();
+        }
+        return;
+      }
+
+      // 입력 중일 때는 숫자 네비게이션 단축키 무시
+      const activeEl = document.activeElement;
+      const isInputActive =
+        activeEl &&
+        (activeEl.tagName === 'INPUT' ||
+          activeEl.tagName === 'TEXTAREA' ||
+          activeEl.tagName === 'SELECT' ||
+          activeEl.isContentEditable);
+
+      if (isInputActive) return;
+
+      // 2. 숫자 1 ~ 7 -> 해당 메뉴로 이동
+      const keyNum = parseInt(e.key, 10);
+      if (keyNum >= 1 && keyNum <= navItems.length) {
+        e.preventDefault();
+        const targetPath = navItems[keyNum - 1].path;
+        navigate(targetPath);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [navigate, navItems.length]);
+
   return (
     <div className="flex h-screen bg-background text-text overflow-hidden">
       {/* Desktop Sidebar */}
@@ -21,13 +65,13 @@ export const Layout = () => {
           <p className="text-xs text-textMuted mt-0.5">개인 생활 대시보드</p>
         </div>
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-          {navItems.map((item) => (
+          {navItems.map((item, idx) => (
             <NavLink
               key={item.path}
               to={item.path}
               end={item.path === '/'}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors text-sm ${
+                `flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors text-sm group ${
                   isActive
                     ? 'bg-primary/10 text-primary font-semibold'
                     : 'text-textMuted hover:bg-background hover:text-text'
@@ -36,9 +80,36 @@ export const Layout = () => {
             >
               {item.icon}
               <span>{item.name}</span>
+              <span className="ml-auto text-[10px] bg-background border border-border px-1.5 py-0.5 rounded text-textMuted font-mono opacity-0 group-hover:opacity-100 transition-opacity">
+                {idx + 1}
+              </span>
             </NavLink>
           ))}
         </nav>
+        {/* Desktop Theme Toggle */}
+        <div className="p-4 border-t border-border mt-auto flex justify-between items-center">
+          <span className="text-xs text-textMuted font-medium">화면 모드</span>
+          <div className="flex bg-background rounded-lg p-0.5 border border-border">
+            {[
+              { id: 'light', icon: <Sun size={15} />, label: '라이트' },
+              { id: 'dark', icon: <Moon size={15} />, label: '다크' },
+              { id: 'system', icon: <Laptop size={15} />, label: '시스템' }
+            ].map(t => (
+              <button
+                key={t.id}
+                onClick={() => setTheme(t.id)}
+                title={t.label}
+                className={`p-1.5 rounded-md transition-all cursor-pointer ${
+                  theme === t.id
+                    ? 'bg-surface text-primary shadow-sm'
+                    : 'text-textMuted hover:text-text'
+                }`}
+              >
+                {t.icon}
+              </button>
+            ))}
+          </div>
+        </div>
       </aside>
 
       {/* Main Content */}

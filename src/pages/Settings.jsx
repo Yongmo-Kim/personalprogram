@@ -5,9 +5,11 @@ import { Button } from '../components/UI/Button';
 import { loadData, saveData } from '../utils/storage';
 import { calculateBMR, recommendMacros } from '../utils/calculations';
 import { INITIAL_USER_SETTINGS } from '../data/mockData';
-import { Settings as SettingsIcon, Save } from 'lucide-react';
+import { Settings as SettingsIcon, Save, Sun, Moon, Laptop } from 'lucide-react';
+import { useTheme } from '../contexts/ThemeContext';
 
 export const Settings = () => {
+  const { theme, setTheme } = useTheme();
   const [settings, setSettings] = useState(INITIAL_USER_SETTINGS);
 
   useEffect(() => {
@@ -43,81 +45,109 @@ export const Settings = () => {
       </header>
 
       <div className="grid md:grid-cols-2 gap-6">
-        <Card>
-          <h3 className="text-xl font-bold mb-4">내 정보</h3>
-          <form onSubmit={handleSave} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <Input 
-                label="키 (cm)" 
-                type="number" 
-                name="height" 
-                value={settings.height} 
-                onChange={handleChange} 
-                required 
-              />
-              <Input 
-                label="몸무게 (kg)" 
-                type="number" 
-                name="weight" 
-                value={settings.weight} 
-                onChange={handleChange} 
-                required 
-              />
-              <Input 
-                label="나이" 
-                type="number" 
-                name="age" 
-                value={settings.age} 
-                onChange={handleChange} 
-                required 
-              />
+        <div className="space-y-6">
+          <Card>
+            <h3 className="text-xl font-bold mb-4">내 정보</h3>
+            <form onSubmit={handleSave} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <Input 
+                  label="키 (cm)" 
+                  type="number" 
+                  name="height" 
+                  value={settings.height} 
+                  onChange={handleChange} 
+                  required 
+                />
+                <Input 
+                  label="몸무게 (kg)" 
+                  type="number" 
+                  name="weight" 
+                  value={settings.weight} 
+                  onChange={handleChange} 
+                  required 
+                />
+                <Input 
+                  label="나이" 
+                  type="number" 
+                  name="age" 
+                  value={settings.age} 
+                  onChange={handleChange} 
+                  required 
+                />
+                <div className="flex flex-col gap-1">
+                  <label className="text-sm font-medium text-textMuted ml-1">성별</label>
+                  <select 
+                    name="gender"
+                    className="bg-background border border-border rounded-xl px-4 py-2 text-text focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                    value={settings.gender}
+                    onChange={handleChange}
+                  >
+                    <option value="male">남성</option>
+                    <option value="female">여성</option>
+                  </select>
+                </div>
+              </div>
+
               <div className="flex flex-col gap-1">
-                <label className="text-sm font-medium text-textMuted ml-1">성별</label>
+                <label className="text-sm font-medium text-textMuted ml-1">운동 목표</label>
                 <select 
-                  name="gender"
+                  name="goal"
                   className="bg-background border border-border rounded-xl px-4 py-2 text-text focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-                  value={settings.gender}
+                  value={settings.goal}
                   onChange={handleChange}
                 >
-                  <option value="male">남성</option>
-                  <option value="female">여성</option>
+                  <option value="유지">근육 유지 및 건강</option>
+                  <option value="다이어트">다이어트 (체지방 감소)</option>
+                  <option value="벌크업">벌크업 (근육량 증가)</option>
                 </select>
               </div>
-            </div>
 
-            <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium text-textMuted ml-1">운동 목표</label>
-              <select 
-                name="goal"
-                className="bg-background border border-border rounded-xl px-4 py-2 text-text focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-                value={settings.goal}
-                onChange={handleChange}
-              >
-                <option value="유지">근육 유지 및 건강</option>
-                <option value="다이어트">다이어트 (체지방 감소)</option>
-                <option value="벌크업">벌크업 (근육량 증가)</option>
-              </select>
-            </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium text-textMuted ml-1">운동 경력</label>
+                <select 
+                  name="experience"
+                  className="bg-background border border-border rounded-xl px-4 py-2 text-text focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                  value={settings.experience}
+                  onChange={handleChange}
+                >
+                  <option value="초보자">초보자 (1년 미만)</option>
+                  <option value="중급자">중급자 (1~3년)</option>
+                  <option value="고급자">고급자 (3년 이상)</option>
+                </select>
+              </div>
 
-            <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium text-textMuted ml-1">운동 경력</label>
-              <select 
-                name="experience"
-                className="bg-background border border-border rounded-xl px-4 py-2 text-text focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-                value={settings.experience}
-                onChange={handleChange}
-              >
-                <option value="초보자">초보자 (1년 미만)</option>
-                <option value="중급자">중급자 (1~3년)</option>
-                <option value="고급자">고급자 (3년 이상)</option>
-              </select>
-            </div>
+              <Button type="submit" className="w-full flex justify-center items-center gap-2">
+                <Save size={20} /> 저장하기
+              </Button>
+            </form>
+          </Card>
 
-            <Button type="submit" className="w-full flex justify-center items-center gap-2">
-              <Save size={20} /> 저장하기
-            </Button>
-          </form>
-        </Card>
+          <Card>
+            <h3 className="text-xl font-bold mb-4">테마 설정</h3>
+            <p className="text-sm text-textMuted mb-4">원하는 화면 테마를 선택할 수 있습니다. (모바일 기기 적용 가능)</p>
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { id: 'light', name: '라이트', icon: <Sun size={20} className="text-yellow-500" /> },
+                { id: 'dark', name: '다크', icon: <Moon size={20} className="text-indigo-400" /> },
+                { id: 'system', name: '시스템', icon: <Laptop size={20} className="text-gray-400" /> }
+              ].map((t) => (
+                <button
+                  key={t.id}
+                  onClick={() => setTheme(t.id)}
+                  type="button"
+                  className={`flex flex-col items-center gap-2 p-4 rounded-xl border transition-all cursor-pointer ${
+                    theme === t.id
+                      ? 'border-primary bg-primary/5 text-primary font-bold shadow-xs'
+                      : 'border-border bg-surface text-textMuted hover:text-text'
+                  }`}
+                >
+                  {t.icon}
+                  <span className="text-xs mt-1">{t.name}</span>
+                </button>
+              ))}
+            </div>
+          </Card>
+        </div>
 
         <Card className="bg-primary/5 border-primary/20">
           <h3 className="text-xl font-bold mb-4 text-primary">자동 목표 추천</h3>

@@ -10,6 +10,7 @@ import {
   ShieldAlert,
   Sparkles,
   TrendingUp,
+  Bookmark,
 } from 'lucide-react';
 import { Card } from '../components/UI/Card';
 import { summarizeNewsArticle } from '../services/aiNewsService';
@@ -20,25 +21,25 @@ const CATEGORY_ARTICLE_LIMIT = 50;
 const ALL_ARTICLE_LIMIT = 300;
 
 const toneClass = {
-  red: 'border-red-500/30 bg-red-500/10 text-red-200',
-  blue: 'border-blue-500/30 bg-blue-500/10 text-blue-200',
-  sky: 'border-sky-500/30 bg-sky-500/10 text-sky-200',
-  violet: 'border-violet-500/30 bg-violet-500/10 text-violet-200',
-  emerald: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200',
-  amber: 'border-amber-500/30 bg-amber-500/10 text-amber-200',
-  cyan: 'border-cyan-500/30 bg-cyan-500/10 text-cyan-200',
-  rose: 'border-rose-500/30 bg-rose-500/10 text-rose-200',
-  indigo: 'border-indigo-500/30 bg-indigo-500/10 text-indigo-200',
-  orange: 'border-orange-500/30 bg-orange-500/10 text-orange-200',
-  teal: 'border-teal-500/30 bg-teal-500/10 text-teal-200',
-  primary: 'border-primary/40 bg-primary/15 text-primary',
-  slate: 'border-slate-500/30 bg-slate-500/10 text-slate-200',
+  red: 'border-red-200 dark:border-red-500/30 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-200',
+  blue: 'border-blue-200 dark:border-blue-500/30 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-200',
+  sky: 'border-sky-200 dark:border-sky-500/30 bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-200',
+  violet: 'border-violet-200 dark:border-violet-500/30 bg-violet-50 dark:bg-violet-500/10 text-violet-600 dark:text-violet-200',
+  emerald: 'border-emerald-200 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-200',
+  amber: 'border-amber-200 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-200',
+  cyan: 'border-cyan-200 dark:border-cyan-500/30 bg-cyan-50 dark:bg-cyan-500/10 text-cyan-600 dark:text-cyan-200',
+  rose: 'border-rose-200 dark:border-rose-500/30 bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-200',
+  indigo: 'border-indigo-200 dark:border-indigo-500/30 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-200',
+  orange: 'border-orange-200 dark:border-orange-500/30 bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-200',
+  teal: 'border-teal-200 dark:border-teal-500/30 bg-teal-50 dark:bg-teal-500/10 text-teal-600 dark:text-teal-200',
+  primary: 'border-primary/20 dark:border-primary/40 bg-primary/5 dark:bg-primary/15 text-primary',
+  slate: 'border-slate-200 dark:border-slate-500/30 bg-slate-100 dark:bg-slate-500/10 text-slate-600 dark:text-slate-200',
 };
 
 const importanceClass = {
-  긴급: 'border-red-500/40 bg-red-500/15 text-red-200',
-  중요: 'border-amber-500/40 bg-amber-500/15 text-amber-200',
-  참고: 'border-slate-500/40 bg-slate-500/15 text-slate-200',
+  긴급: 'border-red-200 dark:border-red-500/40 bg-red-50 dark:bg-red-500/15 text-red-600 dark:text-red-200',
+  중요: 'border-amber-200 dark:border-amber-500/40 bg-amber-50 dark:bg-amber-500/15 text-amber-600 dark:text-amber-200',
+  참고: 'border-slate-200 dark:border-slate-500/40 bg-slate-100 dark:bg-slate-500/15 text-slate-600 dark:text-slate-200',
 };
 
 const importanceRank = { 긴급: 3, 중요: 2, 참고: 1 };
@@ -71,9 +72,46 @@ export const WorldNews = () => {
   const [aiLoading, setAiLoading] = useState(false);
   const intervalRef = useRef(null);
 
+  const [bookmarks, setBookmarks] = useState(() => {
+    try {
+      const saved = localStorage.getItem('newsBookmarks');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const toggleBookmark = (article) => {
+    setBookmarks((prev) => {
+      const exists = prev.some((b) => b.url === article.url || b.title === article.title);
+      let updated;
+      if (exists) {
+        updated = prev.filter((b) => b.url !== article.url && b.title !== article.title);
+      } else {
+        updated = [...prev, { ...article, bookmarkedAt: Date.now() }];
+      }
+      localStorage.setItem('newsBookmarks', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
   const loadNews = useCallback(async () => {
     setLoading(true);
     setError('');
+
+    if (activeCategory === 'bookmarks') {
+      try {
+        const saved = localStorage.getItem('newsBookmarks');
+        setNews(saved ? JSON.parse(saved) : []);
+        setLastUpdated(new Date());
+      } catch (err) {
+        setNews([]);
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
     try {
       const data = await fetchWorldCategoryNews(activeCategory, {
         strict: true,
@@ -94,7 +132,7 @@ export const WorldNews = () => {
   }, [loadNews]);
 
   useEffect(() => {
-    if (autoRefresh) {
+    if (autoRefresh && activeCategory !== 'bookmarks') {
       intervalRef.current = setInterval(loadNews, AUTO_REFRESH_INTERVAL);
     }
     return () => {
@@ -103,7 +141,7 @@ export const WorldNews = () => {
         intervalRef.current = null;
       }
     };
-  }, [autoRefresh, loadNews]);
+  }, [autoRefresh, loadNews, activeCategory]);
 
   const filteredNews = useMemo(() => {
     const query = searchText.trim().toLowerCase();
@@ -144,7 +182,7 @@ export const WorldNews = () => {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-xl border border-primary/25 bg-primary/10 p-5">
+      <section className="rounded-xl border border-primary/15 dark:border-primary/25 bg-primary/5 dark:bg-primary/10 p-5">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
           <div>
             <div className="flex items-center gap-2 text-primary">
@@ -198,11 +236,23 @@ export const WorldNews = () => {
       </section>
 
       <div className="flex gap-2 overflow-x-auto pb-1">
+        <button
+          onClick={() => setActiveCategory('bookmarks')}
+          className={`shrink-0 rounded-lg border px-3 py-2 text-sm transition-colors flex items-center gap-1.5 cursor-pointer ${
+            activeCategory === 'bookmarks'
+              ? 'border-amber-200 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-200 font-semibold'
+              : 'border-border bg-surface text-textMuted hover:border-primary/50 hover:text-text'
+          }`}
+        >
+          <Bookmark size={14} className={activeCategory === 'bookmarks' ? 'text-amber-500 fill-amber-500' : 'text-textMuted'} />
+          북마크 ({bookmarks.length})
+        </button>
+
         {WORLD_NEWS_CATEGORIES.map((category) => (
           <button
             key={category.id}
             onClick={() => setActiveCategory(category.id)}
-            className={`shrink-0 rounded-lg border px-3 py-2 text-sm transition-colors ${
+            className={`shrink-0 rounded-lg border px-3 py-2 text-sm transition-colors cursor-pointer ${
               activeCategory === category.id
                 ? toneClass[category.tone] || toneClass.slate
                 : 'border-border bg-surface text-textMuted hover:border-primary/50 hover:text-text'
@@ -370,8 +420,20 @@ export const WorldNews = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     <button
+                      onClick={() => toggleBookmark(item)}
+                      className={`inline-flex items-center gap-1 rounded border px-2 py-1 text-xs transition-colors cursor-pointer ${
+                        bookmarks.some((b) => b.url === item.url || b.title === item.title)
+                          ? 'border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-300 hover:bg-amber-500/20'
+                          : 'border-border bg-background text-textMuted hover:text-text hover:bg-surface'
+                      }`}
+                      title="북마크"
+                    >
+                      <Bookmark size={13} fill={bookmarks.some((b) => b.url === item.url || b.title === item.title) ? 'currentColor' : 'none'} className={bookmarks.some((b) => b.url === item.url || b.title === item.title) ? 'text-amber-500' : ''} />
+                      저장
+                    </button>
+                    <button
                       onClick={() => runAiSummary(item)}
-                      className="inline-flex items-center gap-1 rounded border border-primary/40 bg-primary/10 px-2 py-1 text-xs text-primary hover:bg-primary/15"
+                      className="inline-flex items-center gap-1 rounded border border-primary/40 bg-primary/10 px-2 py-1 text-xs text-primary hover:bg-primary/15 cursor-pointer"
                     >
                       <Bot size={13} />
                       AI 요약

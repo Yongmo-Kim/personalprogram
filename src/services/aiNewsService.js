@@ -1,4 +1,41 @@
+import { fetchRssNews, removeDuplicates } from './newsService';
+
 const DEFAULT_AI_NEWS_ENDPOINT = '/api/news-ai-summary';
+
+export const fetchAiNews = async () => {
+  const query = 'artificial intelligence OR AI OR LLM OR OpenAI OR NVIDIA OR Anthropic OR Google DeepMind';
+  const news = await fetchRssNews(query, { domain: 'ai' });
+  return removeDuplicates(news).slice(0, 20);
+};
+
+export const fetchAiCompanyNews = async (company) => {
+  if (!company) return [];
+  const keywords = company.newsKeywords?.length
+    ? company.newsKeywords.join(' OR ')
+    : `${company.nameKo || company.name} OR ${company.name} AI`;
+
+  const news = await fetchRssNews(keywords, {
+    domain: 'ai',
+    companyId: company.id,
+    companyName: company.nameKo || company.name,
+    segment: company.segments?.[0],
+  });
+  return removeDuplicates(news).slice(0, 15);
+};
+
+export const fetchAiTechnologyNews = async (technology) => {
+  if (!technology) return [];
+  const keywords = technology.keywords?.length
+    ? technology.keywords.join(' OR ')
+    : `${technology.name} artificial intelligence`;
+
+  const news = await fetchRssNews(keywords, {
+    domain: 'ai',
+    technologies: [technology.id],
+    segment: technology.category,
+  });
+  return removeDuplicates(news).slice(0, 15);
+};
 
 const buildPrompt = (article, question) => `
 너는 세계뉴스를 한국어로 분석하는 개인 인텔리전스 보조원이다.

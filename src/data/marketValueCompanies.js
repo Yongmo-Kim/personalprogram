@@ -97,6 +97,19 @@ const globalTop50 = [
   { companyId: 'macom', symbol: 'MTSI', name: 'MACOM', nameKo: 'MACOM', exchange: 'Nasdaq', region: 'global', country: 'United States', segment: 'fabless', currency: 'USD', fallbackMarketCapUsd: 19_000_000_000 },
   { companyId: 'ambarella', symbol: 'AMBA', name: 'Ambarella', nameKo: 'Ambarella', exchange: 'Nasdaq', region: 'global', country: 'United States', segment: 'fabless', currency: 'USD', fallbackMarketCapUsd: 18_000_000_000 },
   { companyId: 'soitec', symbol: 'SOI.PA', name: 'Soitec', nameKo: 'Soitec', exchange: 'Euronext Paris', region: 'global', country: 'France', segment: 'supply-chain', currency: 'EUR', fallbackMarketCapUsd: 16_000_000_000 },
+  // AI Additional Companies
+  { companyId: 'microsoft', symbol: 'MSFT', name: 'Microsoft', nameKo: 'Microsoft', exchange: 'Nasdaq', region: 'global', country: 'United States', segment: 'cloud-bigtech', currency: 'USD', fallbackMarketCapUsd: 3_200_000_000_000 },
+  { companyId: 'alphabet', symbol: 'GOOGL', name: 'Alphabet', nameKo: 'Alphabet', exchange: 'Nasdaq', region: 'global', country: 'United States', segment: 'cloud-bigtech', currency: 'USD', fallbackMarketCapUsd: 2_100_000_000_000 },
+  { companyId: 'amazon', symbol: 'AMZN', name: 'Amazon', nameKo: 'Amazon', exchange: 'Nasdaq', region: 'global', country: 'United States', segment: 'cloud-bigtech', currency: 'USD', fallbackMarketCapUsd: 1_900_000_000_000 },
+  { companyId: 'meta', symbol: 'META', name: 'Meta', nameKo: 'Meta', exchange: 'Nasdaq', region: 'global', country: 'United States', segment: 'cloud-bigtech', currency: 'USD', fallbackMarketCapUsd: 1_300_000_000_000 },
+  { companyId: 'oracle', symbol: 'ORCL', name: 'Oracle', nameKo: 'Oracle', exchange: 'NYSE', region: 'global', country: 'United States', segment: 'cloud-bigtech', currency: 'USD', fallbackMarketCapUsd: 400_000_000_000 },
+  { companyId: 'palantir', symbol: 'PLTR', name: 'Palantir', nameKo: 'Palantir', exchange: 'NYSE', region: 'global', country: 'United States', segment: 'applications', currency: 'USD', fallbackMarketCapUsd: 65_000_000_000 },
+  { companyId: 'snowflake', symbol: 'SNOW', name: 'Snowflake', nameKo: 'Snowflake', exchange: 'NYSE', region: 'global', country: 'United States', segment: 'mlops-data', currency: 'USD', fallbackMarketCapUsd: 55_000_000_000 },
+  { companyId: 'databricks', symbol: 'DBRX.PRIVATE', name: 'Databricks', nameKo: 'Databricks', exchange: 'Private', region: 'global', country: 'United States', segment: 'mlops-data', currency: 'USD', fallbackMarketCapUsd: 43_000_000_000 },
+  { companyId: 'crowdstrike', symbol: 'CRWD', name: 'CrowdStrike', nameKo: 'CrowdStrike', exchange: 'Nasdaq', region: 'global', country: 'United States', segment: 'security-gov', currency: 'USD', fallbackMarketCapUsd: 85_000_000_000 },
+  { companyId: 'tesla', symbol: 'TSLA', name: 'Tesla', nameKo: 'Tesla', exchange: 'Nasdaq', region: 'global', country: 'United States', segment: 'robotics-av', currency: 'USD', fallbackMarketCapUsd: 600_000_000_000 },
+  { companyId: 'naver', symbol: '035420.KS', name: 'NAVER', nameKo: '네이버', exchange: 'KRX', region: 'korea', country: 'South Korea', segment: 'cloud-bigtech', currency: 'KRW', fallbackMarketCapUsd: 25_000_000_000 },
+  { companyId: 'kakao', symbol: '035720.KS', name: 'Kakao', nameKo: '카카오', exchange: 'KRX', region: 'korea', country: 'South Korea', segment: 'cloud-bigtech', currency: 'KRW', fallbackMarketCapUsd: 18_000_000_000 },
 ];
 
 export const marketValueCompanies = [

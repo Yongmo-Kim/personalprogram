@@ -15,6 +15,11 @@ export const JOB_INDUSTRIES = [
     keywords: '방산 항공우주 레이더 유도무기 항공전자 위성 국방 임베디드',
   },
   {
+    id: 'ai',
+    label: '인공지능 / AI',
+    keywords: '인공지능 AI 머신러닝 딥러닝 데이터 LLM 생성형AI 컴퓨터비전 NLP 자연어처리 데이터사이언스 MLOps',
+  },
+  {
     id: 'electronics',
     label: '전자 / 하드웨어',
     keywords: '전자회로 회로설계 PCB 하드웨어 전장 펌웨어 전력전자',

@@ -1,11 +1,44 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
-import { Briefcase, CalendarDays, Clock, Cpu, Globe, Shield, Sliders, Eye, EyeOff, ChevronUp, ChevronDown } from 'lucide-react';
+import {
+  BrainCircuit,
+  Briefcase,
+  CalendarDays,
+  ChevronDown,
+  ChevronUp,
+  Clock,
+  Cpu,
+  Eye,
+  EyeOff,
+  Globe,
+  Shield,
+  Sliders,
+} from 'lucide-react';
 import { Card } from '../components/UI/Card';
 import { loadData } from '../utils/storage';
 import { fetchSemiNews, fetchWorldNews } from '../services/newsService';
 import { fetchJobs } from '../services/jobsService';
+
+const DEFAULT_WIDGETS = [
+  { id: 'calendar', label: '오늘 일정', enabled: true },
+  { id: 'jobs', label: '취업 공고', enabled: true },
+  { id: 'worldNews', label: '세계뉴스', enabled: true },
+  { id: 'semiNews', label: '반도체', enabled: true },
+  { id: 'defense', label: '방위산업', enabled: true },
+  { id: 'ai', label: '인공지능', enabled: true },
+];
+
+const loadWidgets = () => {
+  try {
+    const saved = localStorage.getItem('dashboardWidgets');
+    const parsed = saved ? JSON.parse(saved) : [];
+    const merged = DEFAULT_WIDGETS.map((widget) => parsed.find((item) => item.id === widget.id) || widget);
+    return merged;
+  } catch {
+    return DEFAULT_WIDGETS;
+  }
+};
 
 export const HomeDashboard = () => {
   const todayDate = format(new Date(), 'yyyy-MM-dd');
@@ -14,28 +47,7 @@ export const HomeDashboard = () => {
   const [worldNews, setWorldNews] = useState([]);
   const [semiNews, setSemiNews] = useState([]);
   const [lastUpdated, setLastUpdated] = useState(null);
-
-  // Widget Customization States
-  const [widgets, setWidgets] = useState(() => {
-    try {
-      const saved = localStorage.getItem('dashboardWidgets');
-      return saved ? JSON.parse(saved) : [
-        { id: 'calendar', label: '오늘 일정', enabled: true },
-        { id: 'jobs', label: '취업 공고', enabled: true },
-        { id: 'worldNews', label: '세계 뉴스', enabled: true },
-        { id: 'semiNews', label: '반도체 뉴스', enabled: true },
-        { id: 'defense', label: '방위산업', enabled: true }
-      ];
-    } catch {
-      return [
-        { id: 'calendar', label: '오늘 일정', enabled: true },
-        { id: 'jobs', label: '취업 공고', enabled: true },
-        { id: 'worldNews', label: '세계 뉴스', enabled: true },
-        { id: 'semiNews', label: '반도체 뉴스', enabled: true },
-        { id: 'defense', label: '방위산업', enabled: true }
-      ];
-    }
-  });
+  const [widgets, setWidgets] = useState(loadWidgets);
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
@@ -48,10 +60,13 @@ export const HomeDashboard = () => {
     setLastUpdated(new Date());
   }, [todayDate]);
 
+  const saveWidgets = (nextWidgets) => {
+    setWidgets(nextWidgets);
+    localStorage.setItem('dashboardWidgets', JSON.stringify(nextWidgets));
+  };
+
   const toggleWidget = (id) => {
-    const updated = widgets.map(w => w.id === id ? { ...w, enabled: !w.enabled } : w);
-    setWidgets(updated);
-    localStorage.setItem('dashboardWidgets', JSON.stringify(updated));
+    saveWidgets(widgets.map((widget) => (widget.id === id ? { ...widget, enabled: !widget.enabled } : widget)));
   };
 
   const moveWidget = (index, direction) => {
@@ -61,8 +76,7 @@ export const HomeDashboard = () => {
     const temp = updated[index];
     updated[index] = updated[nextIndex];
     updated[nextIndex] = temp;
-    setWidgets(updated);
-    localStorage.setItem('dashboardWidgets', JSON.stringify(updated));
+    saveWidgets(updated);
   };
 
   const pendingEvents = calendarEvents.filter((event) => !event.completed).length;
@@ -108,8 +122,8 @@ export const HomeDashboard = () => {
                 <ul className="space-y-2">
                   {jobs.map((job) => (
                     <li key={job.id} className="text-sm">
-                      <p className="font-medium truncate">{job.company}</p>
-                      <p className="text-xs text-textMuted truncate">{job.title}</p>
+                      <p className="truncate font-medium">{job.company}</p>
+                      <p className="truncate text-xs text-textMuted">{job.title}</p>
                     </li>
                   ))}
                 </ul>
@@ -131,7 +145,7 @@ export const HomeDashboard = () => {
                   {worldNews.map((item) => (
                     <li key={item.id} className="text-sm">
                       <p className="line-clamp-1 font-medium">{item.title}</p>
-                      <p className="text-xs text-textMuted truncate">{item.source} · {item.date}</p>
+                      <p className="truncate text-xs text-textMuted">{item.source} · {item.date}</p>
                     </li>
                   ))}
                 </ul>
@@ -153,7 +167,7 @@ export const HomeDashboard = () => {
                   {semiNews.map((item) => (
                     <li key={item.id} className="text-sm">
                       <p className="line-clamp-1 font-medium">{item.title}</p>
-                      <p className="text-xs text-textMuted truncate">{item.source} · {item.publishedAt || item.date}</p>
+                      <p className="truncate text-xs text-textMuted">{item.source} · {item.publishedAt || item.date}</p>
                     </li>
                   ))}
                 </ul>
@@ -170,10 +184,24 @@ export const HomeDashboard = () => {
               <h3 className="mb-3 flex items-center gap-2 text-lg font-bold">
                 <Shield size={20} className="text-emerald-400" /> 방위산업
               </h3>
-              <p className="text-sm leading-relaxed text-textMuted mb-2">
+              <p className="mb-2 text-sm leading-relaxed text-textMuted">
                 국내외 방산 기업, 핵심 기술, 밸류체인, 시장가치 흐름을 확인합니다.
               </p>
-              <span className="text-xs text-primary font-medium hover:underline">자세히 보기 &rarr;</span>
+              <span className="text-xs font-medium text-primary hover:underline">자세히 보기 →</span>
+            </Card>
+          </Link>
+        );
+      case 'ai':
+        return (
+          <Link key="ai" to="/ai" className="block">
+            <Card className="h-full transition-colors hover:border-fuchsia-400/50">
+              <h3 className="mb-3 flex items-center gap-2 text-lg font-bold">
+                <BrainCircuit size={20} className="text-fuchsia-400" /> 인공지능
+              </h3>
+              <p className="mb-2 text-sm leading-relaxed text-textMuted">
+                AI 기업, 모델, 인프라, 밸류체인, 시장 흐름을 하나의 산업 지도로 확인합니다.
+              </p>
+              <span className="text-xs font-medium text-primary hover:underline">자세히 보기 →</span>
             </Card>
           </Link>
         );
@@ -191,13 +219,14 @@ export const HomeDashboard = () => {
         </div>
         <div className="flex items-center gap-3">
           {lastUpdated && (
-            <span className="hidden sm:flex items-center gap-1 text-xs text-textMuted">
+            <span className="hidden items-center gap-1 text-xs text-textMuted sm:flex">
               <Clock size={12} /> {format(lastUpdated, 'HH:mm')} 업데이트
             </span>
           )}
           <button
+            type="button"
             onClick={() => setIsEditing(!isEditing)}
-            className={`p-2 rounded-xl border flex items-center gap-1.5 text-xs font-semibold transition-colors cursor-pointer ${
+            className={`flex cursor-pointer items-center gap-1.5 rounded-xl border p-2 text-xs font-semibold transition-colors ${
               isEditing
                 ? 'border-primary bg-primary/10 text-primary'
                 : 'border-border bg-surface text-textMuted hover:text-text'
@@ -211,35 +240,36 @@ export const HomeDashboard = () => {
 
       {isEditing && (
         <Card className="border-primary/20 bg-primary/5 p-4">
-          <h3 className="font-bold text-sm mb-3 text-primary">위젯 관리 및 순서 설정</h3>
-          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-            {widgets.map((widget, idx) => (
-              <div key={widget.id} className="flex items-center justify-between bg-surface border border-border px-3 py-2 rounded-xl text-xs">
-                <span className="font-semibold truncate mr-2">{widget.label}</span>
+          <h3 className="mb-3 text-sm font-bold text-primary">위젯 관리 및 순서 설정</h3>
+          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+            {widgets.map((widget, index) => (
+              <div key={widget.id} className="flex items-center justify-between rounded-xl border border-border bg-surface px-3 py-2 text-xs">
+                <span className="mr-2 truncate font-semibold">{widget.label}</span>
                 <div className="flex items-center gap-1">
                   <button
+                    type="button"
                     onClick={() => toggleWidget(widget.id)}
-                    className={`p-1 rounded transition-colors cursor-pointer ${
-                      widget.enabled
-                        ? 'text-primary hover:bg-primary/10'
-                        : 'text-textMuted hover:bg-background'
+                    className={`cursor-pointer rounded p-1 transition-colors ${
+                      widget.enabled ? 'text-primary hover:bg-primary/10' : 'text-textMuted hover:bg-background'
                     }`}
-                    title={widget.enabled ? "숨기기" : "보이기"}
+                    title={widget.enabled ? '숨기기' : '보이기'}
                   >
                     {widget.enabled ? <Eye size={14} /> : <EyeOff size={14} />}
                   </button>
                   <button
-                    onClick={() => moveWidget(idx, -1)}
-                    disabled={idx === 0}
-                    className="p-1 rounded hover:bg-background disabled:opacity-30 cursor-pointer text-text"
+                    type="button"
+                    onClick={() => moveWidget(index, -1)}
+                    disabled={index === 0}
+                    className="cursor-pointer rounded p-1 text-text hover:bg-background disabled:opacity-30"
                     title="앞으로"
                   >
                     <ChevronUp size={14} className="rotate-270 md:rotate-0" />
                   </button>
                   <button
-                    onClick={() => moveWidget(idx, 1)}
-                    disabled={idx === widgets.length - 1}
-                    className="p-1 rounded hover:bg-background disabled:opacity-30 cursor-pointer text-text"
+                    type="button"
+                    onClick={() => moveWidget(index, 1)}
+                    disabled={index === widgets.length - 1}
+                    className="cursor-pointer rounded p-1 text-text hover:bg-background disabled:opacity-30"
                     title="뒤로"
                   >
                     <ChevronDown size={14} className="rotate-270 md:rotate-0" />
@@ -251,16 +281,15 @@ export const HomeDashboard = () => {
         </Card>
       )}
 
-      {/* Widgets Grid */}
-      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
         {widgets.map((widget) => renderWidget(widget))}
       </div>
 
-      {widgets.filter(w => w.enabled).length === 0 && (
-        <div className="py-20 text-center text-textMuted border border-dashed border-border rounded-2xl bg-surface/50">
+      {widgets.filter((widget) => widget.enabled).length === 0 && (
+        <div className="rounded-2xl border border-dashed border-border bg-surface/50 py-20 text-center text-textMuted">
           <Sliders size={36} className="mx-auto mb-2 opacity-40" />
           <p className="text-sm">화면에 표시할 위젯이 없습니다.</p>
-          <p className="text-xs mt-1">상단의 '위젯 관리' 버튼을 눌러 위젯을 활성화해보세요.</p>
+          <p className="mt-1 text-xs">상단의 위젯 관리 버튼을 눌러 위젯을 활성화해보세요.</p>
         </div>
       )}
     </div>

@@ -1,17 +1,11 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-
-const ThemeContext = createContext();
+import { useEffect, useState } from 'react';
+import { ThemeContext } from './theme';
 
 export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState(() => {
-    const savedTheme = localStorage.getItem('theme');
-    return savedTheme || 'system';
-  });
+  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'system');
 
   useEffect(() => {
     const root = window.document.documentElement;
-    
-    // 이전 테마 클래스 제거
     root.classList.remove('light', 'dark');
 
     if (theme === 'system') {
@@ -24,15 +18,14 @@ export function ThemeProvider({ children }) {
     localStorage.setItem('theme', theme);
   }, [theme]);
 
-  // 시스템 테마 변경 감지
   useEffect(() => {
-    if (theme !== 'system') return;
+    if (theme !== 'system') return undefined;
 
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleSystemThemeChange = (e) => {
+    const handleSystemThemeChange = (event) => {
       const root = window.document.documentElement;
       root.classList.remove('light', 'dark');
-      root.classList.add(e.matches ? 'dark' : 'light');
+      root.classList.add(event.matches ? 'dark' : 'light');
     };
 
     mediaQuery.addEventListener('change', handleSystemThemeChange);
@@ -44,12 +37,4 @@ export function ThemeProvider({ children }) {
       {children}
     </ThemeContext.Provider>
   );
-}
-
-export function useTheme() {
-  const context = useContext(ThemeContext);
-  if (context === undefined) {
-    throw new Error('useTheme must be used within a ThemeProvider');
-  }
-  return context;
 }

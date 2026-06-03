@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   AlertCircle,
+  Bookmark,
   Bot,
   ExternalLink,
   Globe,
@@ -10,7 +11,6 @@ import {
   ShieldAlert,
   Sparkles,
   TrendingUp,
-  Bookmark,
 } from 'lucide-react';
 import { Card } from '../components/UI/Card';
 import { summarizeNewsArticle } from '../services/aiNewsService';
@@ -21,25 +21,25 @@ const CATEGORY_ARTICLE_LIMIT = 50;
 const ALL_ARTICLE_LIMIT = 300;
 
 const toneClass = {
-  red: 'border-red-200 dark:border-red-500/30 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-200',
-  blue: 'border-blue-200 dark:border-blue-500/30 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-200',
-  sky: 'border-sky-200 dark:border-sky-500/30 bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-200',
-  violet: 'border-violet-200 dark:border-violet-500/30 bg-violet-50 dark:bg-violet-500/10 text-violet-600 dark:text-violet-200',
-  emerald: 'border-emerald-200 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-200',
-  amber: 'border-amber-200 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-200',
-  cyan: 'border-cyan-200 dark:border-cyan-500/30 bg-cyan-50 dark:bg-cyan-500/10 text-cyan-600 dark:text-cyan-200',
-  rose: 'border-rose-200 dark:border-rose-500/30 bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-200',
-  indigo: 'border-indigo-200 dark:border-indigo-500/30 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-200',
-  orange: 'border-orange-200 dark:border-orange-500/30 bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-200',
-  teal: 'border-teal-200 dark:border-teal-500/30 bg-teal-50 dark:bg-teal-500/10 text-teal-600 dark:text-teal-200',
-  primary: 'border-primary/20 dark:border-primary/40 bg-primary/5 dark:bg-primary/15 text-primary',
-  slate: 'border-slate-200 dark:border-slate-500/30 bg-slate-100 dark:bg-slate-500/10 text-slate-600 dark:text-slate-200',
+  red: 'border-red-200 bg-red-50 text-red-600 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-200',
+  blue: 'border-blue-200 bg-blue-50 text-blue-600 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-200',
+  sky: 'border-sky-200 bg-sky-50 text-sky-600 dark:border-sky-500/30 dark:bg-sky-500/10 dark:text-sky-200',
+  violet: 'border-violet-200 bg-violet-50 text-violet-600 dark:border-violet-500/30 dark:bg-violet-500/10 dark:text-violet-200',
+  emerald: 'border-emerald-200 bg-emerald-50 text-emerald-600 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-200',
+  amber: 'border-amber-200 bg-amber-50 text-amber-600 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200',
+  cyan: 'border-cyan-200 bg-cyan-50 text-cyan-600 dark:border-cyan-500/30 dark:bg-cyan-500/10 dark:text-cyan-200',
+  rose: 'border-rose-200 bg-rose-50 text-rose-600 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-200',
+  indigo: 'border-indigo-200 bg-indigo-50 text-indigo-600 dark:border-indigo-500/30 dark:bg-indigo-500/10 dark:text-indigo-200',
+  orange: 'border-orange-200 bg-orange-50 text-orange-600 dark:border-orange-500/30 dark:bg-orange-500/10 dark:text-orange-200',
+  teal: 'border-teal-200 bg-teal-50 text-teal-600 dark:border-teal-500/30 dark:bg-teal-500/10 dark:text-teal-200',
+  primary: 'border-primary/20 bg-primary/5 text-primary dark:border-primary/40 dark:bg-primary/15',
+  slate: 'border-slate-200 bg-slate-100 text-slate-600 dark:border-slate-500/30 dark:bg-slate-500/10 dark:text-slate-200',
 };
 
 const importanceClass = {
-  긴급: 'border-red-200 dark:border-red-500/40 bg-red-50 dark:bg-red-500/15 text-red-600 dark:text-red-200',
-  중요: 'border-amber-200 dark:border-amber-500/40 bg-amber-50 dark:bg-amber-500/15 text-amber-600 dark:text-amber-200',
-  참고: 'border-slate-200 dark:border-slate-500/40 bg-slate-100 dark:bg-slate-500/15 text-slate-600 dark:text-slate-200',
+  긴급: 'border-red-200 bg-red-50 text-red-600 dark:border-red-500/40 dark:bg-red-500/15 dark:text-red-200',
+  중요: 'border-amber-200 bg-amber-50 text-amber-600 dark:border-amber-500/40 dark:bg-amber-500/15 dark:text-amber-200',
+  참고: 'border-slate-200 bg-slate-100 text-slate-600 dark:border-slate-500/40 dark:bg-slate-500/15 dark:text-slate-200',
 };
 
 const importanceRank = { 긴급: 3, 중요: 2, 참고: 1 };
@@ -54,6 +54,9 @@ const formatTime = (date) => {
     second: '2-digit',
   });
 };
+
+const isBookmarked = (bookmarks, article) =>
+  bookmarks.some((bookmark) => bookmark.url === article.url || bookmark.title === article.title);
 
 export const WorldNews = () => {
   const [news, setNews] = useState([]);
@@ -83,13 +86,11 @@ export const WorldNews = () => {
 
   const toggleBookmark = (article) => {
     setBookmarks((prev) => {
-      const exists = prev.some((b) => b.url === article.url || b.title === article.title);
-      let updated;
-      if (exists) {
-        updated = prev.filter((b) => b.url !== article.url && b.title !== article.title);
-      } else {
-        updated = [...prev, { ...article, bookmarkedAt: Date.now() }];
-      }
+      const exists = isBookmarked(prev, article);
+      const updated = exists
+        ? prev.filter((bookmark) => bookmark.url !== article.url && bookmark.title !== article.title)
+        : [...prev, { ...article, bookmarkedAt: Date.now() }];
+
       localStorage.setItem('newsBookmarks', JSON.stringify(updated));
       return updated;
     });
@@ -104,7 +105,7 @@ export const WorldNews = () => {
         const saved = localStorage.getItem('newsBookmarks');
         setNews(saved ? JSON.parse(saved) : []);
         setLastUpdated(new Date());
-      } catch (err) {
+      } catch {
         setNews([]);
       } finally {
         setLoading(false);
@@ -135,13 +136,14 @@ export const WorldNews = () => {
     if (autoRefresh && activeCategory !== 'bookmarks') {
       intervalRef.current = setInterval(loadNews, AUTO_REFRESH_INTERVAL);
     }
+
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
     };
-  }, [autoRefresh, loadNews, activeCategory]);
+  }, [activeCategory, autoRefresh, loadNews]);
 
   const filteredNews = useMemo(() => {
     const query = searchText.trim().toLowerCase();
@@ -182,7 +184,7 @@ export const WorldNews = () => {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-xl border border-primary/15 dark:border-primary/25 bg-primary/5 dark:bg-primary/10 p-5">
+      <section className="rounded-xl border border-primary/15 bg-primary/5 p-5 dark:border-primary/25 dark:bg-primary/10">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
           <div>
             <div className="flex items-center gap-2 text-primary">
@@ -201,12 +203,13 @@ export const WorldNews = () => {
               <input
                 type="checkbox"
                 checked={autoRefresh}
-                onChange={(e) => setAutoRefresh(e.target.checked)}
+                onChange={(event) => setAutoRefresh(event.target.checked)}
                 className="h-4 w-4 rounded border-border bg-surface accent-primary"
               />
               5분 자동 갱신
             </label>
             <button
+              type="button"
               onClick={loadNews}
               disabled={loading}
               className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text transition-colors hover:bg-border disabled:opacity-50"
@@ -237,22 +240,24 @@ export const WorldNews = () => {
 
       <div className="flex gap-2 overflow-x-auto pb-1">
         <button
+          type="button"
           onClick={() => setActiveCategory('bookmarks')}
-          className={`shrink-0 rounded-lg border px-3 py-2 text-sm transition-colors flex items-center gap-1.5 cursor-pointer ${
+          className={`flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg border px-3 py-2 text-sm transition-colors ${
             activeCategory === 'bookmarks'
-              ? 'border-amber-200 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-200 font-semibold'
+              ? 'border-amber-200 bg-amber-50 font-semibold text-amber-600 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200'
               : 'border-border bg-surface text-textMuted hover:border-primary/50 hover:text-text'
           }`}
         >
-          <Bookmark size={14} className={activeCategory === 'bookmarks' ? 'text-amber-500 fill-amber-500' : 'text-textMuted'} />
+          <Bookmark size={14} className={activeCategory === 'bookmarks' ? 'fill-amber-500 text-amber-500' : 'text-textMuted'} />
           북마크 ({bookmarks.length})
         </button>
 
         {WORLD_NEWS_CATEGORIES.map((category) => (
           <button
             key={category.id}
+            type="button"
             onClick={() => setActiveCategory(category.id)}
-            className={`shrink-0 rounded-lg border px-3 py-2 text-sm transition-colors cursor-pointer ${
+            className={`shrink-0 cursor-pointer rounded-lg border px-3 py-2 text-sm transition-colors ${
               activeCategory === category.id
                 ? toneClass[category.tone] || toneClass.slate
                 : 'border-border bg-surface text-textMuted hover:border-primary/50 hover:text-text'
@@ -269,14 +274,14 @@ export const WorldNews = () => {
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-textMuted" />
             <input
               value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
+              onChange={(event) => setSearchText(event.target.value)}
               className="w-full rounded-lg border border-border bg-background py-2 pl-9 pr-3 text-text"
               placeholder="검색어 입력: Nvidia, oil, defense, Korea..."
             />
           </label>
           <select
             value={importanceFilter}
-            onChange={(e) => setImportanceFilter(e.target.value)}
+            onChange={(event) => setImportanceFilter(event.target.value)}
             className="rounded-lg border border-border bg-background px-3 py-2 text-text"
           >
             <option value="all">전체 중요도</option>
@@ -286,7 +291,7 @@ export const WorldNews = () => {
           </select>
           <select
             value={sortMode}
-            onChange={(e) => setSortMode(e.target.value)}
+            onChange={(event) => setSortMode(event.target.value)}
             className="rounded-lg border border-border bg-background px-3 py-2 text-text"
           >
             <option value="latest">최신순</option>
@@ -332,12 +337,13 @@ export const WorldNews = () => {
               </div>
               <textarea
                 value={aiQuestion}
-                onChange={(e) => setAiQuestion(e.target.value)}
+                onChange={(event) => setAiQuestion(event.target.value)}
                 rows={3}
                 className="w-full resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm text-text"
                 placeholder="예: 이 기사 반도체에 영향 있어?"
               />
               <button
+                type="button"
                 onClick={() => runAiSummary(selectedArticle)}
                 disabled={aiLoading}
                 className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-3 py-2 text-sm font-bold text-white disabled:opacity-50"
@@ -382,6 +388,7 @@ export const WorldNews = () => {
                 이 페이지는 실제 기사만 표시하도록 설정되어 있어 연결 실패 시 샘플 뉴스를 보여주지 않습니다.
               </p>
               <button
+                type="button"
                 onClick={loadNews}
                 className="mt-4 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/80"
               >
@@ -401,77 +408,82 @@ export const WorldNews = () => {
 
       {!error && filteredNews.length > 0 && (
         <div className="grid gap-4 xl:grid-cols-2">
-          {filteredNews.map((item, index) => (
-            <Card key={item.id ?? index}>
-              <div className="flex h-full flex-col gap-3">
-                <div className="flex flex-wrap items-start justify-between gap-2">
-                  <div className="flex flex-wrap gap-2">
-                    <span className={`rounded border px-2 py-0.5 text-xs ${importanceClass[item.importance] || importanceClass.참고}`}>
-                      {item.importance}
-                    </span>
-                    <span className={`rounded border px-2 py-0.5 text-xs ${toneClass[item.tone] || toneClass.slate}`}>
-                      {item.category}
-                    </span>
-                    {item.region && (
-                      <span className="rounded border border-border bg-background px-2 py-0.5 text-xs text-textMuted">
-                        {item.region}
+          {filteredNews.map((item, index) => {
+            const bookmarked = isBookmarked(bookmarks, item);
+            return (
+              <Card key={item.id ?? index}>
+                <div className="flex h-full flex-col gap-3">
+                  <div className="flex flex-wrap items-start justify-between gap-2">
+                    <div className="flex flex-wrap gap-2">
+                      <span className={`rounded border px-2 py-0.5 text-xs ${importanceClass[item.importance] || importanceClass.참고}`}>
+                        {item.importance}
                       </span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => toggleBookmark(item)}
-                      className={`inline-flex items-center gap-1 rounded border px-2 py-1 text-xs transition-colors cursor-pointer ${
-                        bookmarks.some((b) => b.url === item.url || b.title === item.title)
-                          ? 'border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-300 hover:bg-amber-500/20'
-                          : 'border-border bg-background text-textMuted hover:text-text hover:bg-surface'
-                      }`}
-                      title="북마크"
-                    >
-                      <Bookmark size={13} fill={bookmarks.some((b) => b.url === item.url || b.title === item.title) ? 'currentColor' : 'none'} className={bookmarks.some((b) => b.url === item.url || b.title === item.title) ? 'text-amber-500' : ''} />
-                      저장
-                    </button>
-                    <button
-                      onClick={() => runAiSummary(item)}
-                      className="inline-flex items-center gap-1 rounded border border-primary/40 bg-primary/10 px-2 py-1 text-xs text-primary hover:bg-primary/15 cursor-pointer"
-                    >
-                      <Bot size={13} />
-                      AI 요약
-                    </button>
-                    {item.url && (
-                      <a
-                        href={item.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-xs text-primary hover:text-primary/80"
+                      <span className={`rounded border px-2 py-0.5 text-xs ${toneClass[item.tone] || toneClass.slate}`}>
+                        {item.category}
+                      </span>
+                      {item.region && (
+                        <span className="rounded border border-border bg-background px-2 py-0.5 text-xs text-textMuted">
+                          {item.region}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => toggleBookmark(item)}
+                        className={`inline-flex cursor-pointer items-center gap-1 rounded border px-2 py-1 text-xs transition-colors ${
+                          bookmarked
+                            ? 'border-amber-500/40 bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 dark:text-amber-300'
+                            : 'border-border bg-background text-textMuted hover:bg-surface hover:text-text'
+                        }`}
+                        title="북마크"
                       >
-                        원문
-                        <ExternalLink size={13} />
-                      </a>
-                    )}
+                        <Bookmark size={13} fill={bookmarked ? 'currentColor' : 'none'} className={bookmarked ? 'text-amber-500' : ''} />
+                        저장
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => runAiSummary(item)}
+                        className="inline-flex cursor-pointer items-center gap-1 rounded border border-primary/40 bg-primary/10 px-2 py-1 text-xs text-primary hover:bg-primary/15"
+                      >
+                        <Bot size={13} />
+                        AI 요약
+                      </button>
+                      {item.url && (
+                        <a
+                          href={item.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-xs text-primary hover:text-primary/80"
+                        >
+                          원문
+                          <ExternalLink size={13} />
+                        </a>
+                      )}
+                    </div>
+                  </div>
+
+                  <h2 className="text-lg font-bold leading-snug text-text">{item.title}</h2>
+
+                  <div className="flex flex-wrap items-center gap-2 text-sm text-textMuted">
+                    {item.source && <span>{item.source}</span>}
+                    {item.source && item.date && <span>·</span>}
+                    {item.date && <span>{item.date}</span>}
+                  </div>
+
+                  {item.summary && <p className="line-clamp-3 leading-relaxed text-textMuted">{item.summary}</p>}
+
+                  <div className="mt-auto flex flex-wrap gap-2 pt-1">
+                    {(item.interestTags?.length ? item.interestTags : item.keywords || []).slice(0, 4).map((tag) => (
+                      <span key={tag} className="rounded border border-primary/30 bg-primary/10 px-2 py-0.5 text-xs text-primary">
+                        {tag}
+                      </span>
+                    ))}
                   </div>
                 </div>
-
-                <h2 className="text-lg font-bold leading-snug text-text">{item.title}</h2>
-
-                <div className="flex flex-wrap items-center gap-2 text-sm text-textMuted">
-                  {item.source && <span>{item.source}</span>}
-                  {item.source && item.date && <span>·</span>}
-                  {item.date && <span>{item.date}</span>}
-                </div>
-
-                {item.summary && <p className="line-clamp-3 leading-relaxed text-textMuted">{item.summary}</p>}
-
-                <div className="mt-auto flex flex-wrap gap-2 pt-1">
-                  {(item.interestTags?.length ? item.interestTags : item.keywords || []).slice(0, 4).map((tag) => (
-                    <span key={tag} className="rounded border border-primary/30 bg-primary/10 px-2 py-0.5 text-xs text-primary">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </Card>
-          ))}
+              </Card>
+            );
+          })}
         </div>
       )}
     </div>

@@ -114,7 +114,7 @@ const fetchGoogleRssViaJson = async (query, metaData = {}) => {
   });
 };
 
-const fetchRssNews = async (query, metaData = {}) => {
+export const fetchRssNews = async (query, metaData = {}) => {
   try {
     return await fetchGoogleRssDirect(query, metaData);
   } catch (directError) {
@@ -126,7 +126,7 @@ const fetchRssNews = async (query, metaData = {}) => {
   }
 };
 
-const toFallbackNews = (items, metaData = {}) =>
+export const toFallbackNews = (items, metaData = {}) =>
   items.map((item, index) => ({
     id: `fallback-${item.id || index}`,
     title: item.title,
@@ -139,7 +139,7 @@ const toFallbackNews = (items, metaData = {}) =>
     ...metaData,
   }));
 
-const removeDuplicates = (newsList) => {
+export const removeDuplicates = (newsList) => {
   const seenUrls = new Set();
   const seenTitles = new Set();
 

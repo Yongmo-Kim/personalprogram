@@ -18,7 +18,8 @@
   --border-color: #e2e8f0; /* slate-200 */
 }
 
-html.dark, .dark {
+html.dark,
+.dark {
   --bg-color: #0f172a; /* slate-900 */
   --surface-color: #1e293b; /* slate-800 */
   --text-color: #f8fafc; /* slate-50 */

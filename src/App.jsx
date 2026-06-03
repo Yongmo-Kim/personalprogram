@@ -31,6 +31,18 @@ import { DefenseRoadmap } from './pages/defense/DefenseRoadmap';
 import { DefenseProcess } from './pages/defense/DefenseProcess';
 import { DefenseMarketValue } from './pages/defense/DefenseMarketValue';
 
+// AI module
+import { AIModule } from './pages/ai/AIModule';
+import { AIDashboard } from './pages/ai/AIDashboard';
+import { AICompanyList } from './pages/ai/AICompanyList';
+import { AICompanyDetail } from './pages/ai/AICompanyDetail';
+import { AITechDetail } from './pages/ai/AITechDetail';
+import { AIMarketValue } from './pages/ai/AIMarketValue';
+import { AIValueChain } from './pages/ai/AIValueChain';
+import { AITechnologyRoadmap } from './pages/ai/AITechnologyRoadmap';
+import { AIProcessGuide } from './pages/ai/AIProcessGuide';
+import { AITheory } from './pages/ai/AITheory';
+
 function App() {
   return (
     <Router>
@@ -66,6 +78,19 @@ function App() {
             <Route path=":region" element={<DefenseCompanyList />} />
             <Route path=":region/:segment" element={<DefenseCompanyList />} />
             <Route path=":region/:segment/:companyId" element={<DefenseCompanyDetail />} />
+          </Route>
+
+          {/* AI Module */}
+          <Route path="ai" element={<AIModule />}>
+            <Route index element={<AIDashboard />} />
+            <Route path="market-value" element={<AIMarketValue />} />
+            <Route path="value-chain" element={<AIValueChain />} />
+            <Route path="roadmap" element={<AITechnologyRoadmap />} />
+            <Route path="process" element={<AIProcessGuide />} />
+            <Route path="companies" element={<AICompanyList />} />
+            <Route path="company/:id" element={<AICompanyDetail />} />
+            <Route path="technology/:id" element={<AITechDetail />} />
+            <Route path="theory" element={<AITheory />} />
           </Route>
 
           {/* Other top-level modules */}

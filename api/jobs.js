@@ -7,6 +7,7 @@ const jobIndustryQueries = {
   all: '',
   semiconductor: '반도체 공정 설계 장비 HBM DRAM NAND 파운드리 OSAT 테스트 패키징',
   defense: '방산 항공우주 레이더 유도무기 항공전자 위성 국방 임베디드',
+  ai: '인공지능 AI 머신러닝 딥러닝 데이터 LLM 생성형AI 컴퓨터비전 NLP 자연어처리 데이터사이언스 MLOps',
   electronics: '전자회로 회로설계 PCB 하드웨어 전장 펌웨어 전력전자',
   mobility: '자동차 전장 BMS 자율주행 전력변환 인버터 모터 제어',
   battery: '배터리 이차전지 BMS 전력전자 ESS 충전기 에너지',
@@ -20,6 +21,7 @@ const jobIndustryLabels = {
   all: '전체',
   semiconductor: '반도체',
   defense: '방위산업 / 항공우주',
+  ai: '인공지능 / AI',
   electronics: '전자 / 하드웨어',
   mobility: '자동차 / 모빌리티',
   battery: '배터리 / 에너지',
@@ -90,6 +92,7 @@ const inferIndustryId = (text, fallback) => {
   const value = text.toLowerCase();
   if (value.includes('반도체') || value.includes('hbm') || value.includes('foundry') || value.includes('메모리')) return 'semiconductor';
   if (value.includes('방산') || value.includes('국방') || value.includes('항공') || value.includes('우주') || value.includes('레이더')) return 'defense';
+  if (value.includes('ai') || value.includes('인공지능') || value.includes('머신러닝') || value.includes('딥러닝') || value.includes('llm') || value.includes('데이터사이언스')) return 'ai';
   if (value.includes('자동차') || value.includes('전장') || value.includes('모빌리티') || value.includes('bms')) return 'mobility';
   if (value.includes('배터리') || value.includes('이차전지') || value.includes('에너지')) return 'battery';
   if (value.includes('통신') || value.includes('rf') || value.includes('안테나')) return 'communications';
@@ -248,18 +251,12 @@ const fetchSaraminJobs = async (filters) => {
 };
 
 export default async function handler(req, res) {
-  // CORS Headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
     const requestUrl = new URL(req.url, 'http://localhost');

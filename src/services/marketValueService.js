@@ -1,4 +1,5 @@
 import { marketValueCompanies } from '../data/marketValueCompanies';
+import { fetchFinnhubQuoteMap, hasFinnhubPrice } from './finnhubMarketClient';
 
 const YAHOO_CHART_BASE = '/yahoo-finance/v8/finance/chart';
 const YAHOO_QUOTE_BASE = '/yahoo-finance/v7/finance/quote';
@@ -121,19 +122,23 @@ const makeFallbackCompany = (company, index, fxRates) => {
   };
 };
 
-const makeCompanySnapshot = (company, result, quote, fxRates) => {
+const makeCompanySnapshot = (company, result, quote, finnhubQuote, fxRates) => {
   const meta = result.meta || {};
   const points = getCloseSeries(result);
-  const latest = quote?.regularMarketPrice || meta.regularMarketPrice || points.at(-1)?.close;
-  const previous = quote?.regularMarketPreviousClose || meta.previousClose || meta.chartPreviousClose || points.at(-2)?.close || latest;
+  const hasFinnhub = hasFinnhubPrice(finnhubQuote);
+  const latest = hasFinnhub ? finnhubQuote.c : quote?.regularMarketPrice || meta.regularMarketPrice || points.at(-1)?.close;
+  const previous = hasFinnhub && Number.isFinite(finnhubQuote.pc) && finnhubQuote.pc > 0
+    ? finnhubQuote.pc
+    : quote?.regularMarketPreviousClose || meta.previousClose || meta.chartPreviousClose || points.at(-2)?.close || latest;
   const currency = quote?.currency || meta.currency || company.currency;
   const quoteMarketCap = Number(quote?.marketCap || 0);
   const usesEstimatedMarketCap = !quoteMarketCap;
+  const yahooPrice = quote?.regularMarketPrice || meta.regularMarketPrice || latest;
   const sharesOutstanding =
     company.sharesOutstanding ||
-    (quoteMarketCap && latest ? quoteMarketCap / latest : null) ||
+    (quoteMarketCap && yahooPrice ? quoteMarketCap / yahooPrice : null) ||
     (company.fallbackMarketCapUsd && latest ? company.fallbackMarketCapUsd / toUsd(latest, currency, fxRates) : null);
-  const marketCapLocal = quoteMarketCap || (latest * sharesOutstanding);
+  const marketCapLocal = latest && sharesOutstanding ? latest * sharesOutstanding : quoteMarketCap;
 
   return {
     ...company,
@@ -144,9 +149,12 @@ const makeCompanySnapshot = (company, result, quote, fxRates) => {
     marketCapUsd: toUsd(marketCapLocal, currency, fxRates),
     marketCapLocal,
     sharesOutstanding,
-    lastUpdated: meta.regularMarketTime ? new Date(meta.regularMarketTime * 1000).toISOString() : new Date().toISOString(),
+    lastUpdated: hasFinnhub && Number.isFinite(finnhubQuote.t)
+      ? new Date(finnhubQuote.t * 1000).toISOString()
+      : meta.regularMarketTime ? new Date(meta.regularMarketTime * 1000).toISOString() : new Date().toISOString(),
     points: points.slice(-MAX_POINTS),
     timezone: meta.exchangeTimezoneName,
+    priceSource: hasFinnhub ? 'Finnhub' : 'Yahoo Finance',
     isFallback: false,
     usesEstimatedMarketCap,
   };
@@ -155,14 +163,23 @@ const makeCompanySnapshot = (company, result, quote, fxRates) => {
 export const fetchMarketValueData = async () => {
   const fxRates = await fetchFxRates();
   let quoteMap = new Map();
+  let finnhubQuoteMap = new Map();
   let quoteFailed = false;
+  let finnhubFailed = false;
+  try {
+    finnhubQuoteMap = await fetchFinnhubQuoteMap(marketValueCompanies.map((company) => company.symbol));
+  } catch {
+    finnhubFailed = true;
+  }
   try {
     quoteMap = await fetchQuotes(marketValueCompanies.map((company) => company.symbol));
   } catch {
     quoteFailed = true;
   }
   const settled = await Promise.allSettled(
-    marketValueCompanies.map(async (company) => makeCompanySnapshot(company, await fetchChart(company.symbol), quoteMap.get(company.symbol), fxRates))
+    marketValueCompanies.map(async (company) =>
+      makeCompanySnapshot(company, await fetchChart(company.symbol), quoteMap.get(company.symbol), finnhubQuoteMap.get(company.symbol), fxRates)
+    )
   );
 
   const companies = settled
@@ -180,6 +197,8 @@ export const fetchMarketValueData = async () => {
     fxRates,
     hasFallback,
     quoteFailed,
+    finnhubFailed,
+    provider: finnhubQuoteMap.size ? 'Finnhub + Yahoo Finance fallback' : 'Yahoo Finance fallback',
     lastUpdated: new Date().toISOString(),
   };
 };

@@ -1,6 +1,7 @@
 {
   "rewrites": [
     { "source": "/api/jobs", "destination": "/api/jobs" },
+    { "source": "/api/finnhub", "destination": "/api/finnhub" },
     { "source": "/api/news-ai-summary", "destination": "/api/news-ai-summary" },
     { "source": "/google-news/(.*)", "destination": "/api/google-news?path=$1" },
     { "source": "/yahoo-finance/(.*)", "destination": "/api/yahoo-finance?path=$1" },

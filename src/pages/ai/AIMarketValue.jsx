@@ -181,7 +181,7 @@ export const AIMarketValue = () => {
             </div>
             <h2 className="mt-2 text-3xl font-bold text-text">인공지능 시장 가치</h2>
             <p className="mt-2 max-w-3xl text-sm leading-relaxed text-textMuted">
-              Yahoo Finance 1일 차트 가격을 기준으로 AI 산업을 주도하는 주요 상장 기업들의 시장 가치 흐름을 추적합니다.
+              Finnhub 실시간 quote를 우선 사용하고, 연결 실패 시 Yahoo Finance 1일 차트로 자동 전환해 AI 산업 주요 상장 기업들의 시장 가치 흐름을 추적합니다.
             </p>
           </div>
 

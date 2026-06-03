@@ -51,7 +51,7 @@ export const DefenseMarketValue = () => {
               <span className="text-sm font-semibold">Defense Market Value</span>
             </div>
             <h2 className="mt-2 text-3xl font-bold text-text">방산 시장 가치</h2>
-            <p className="mt-2 max-w-3xl text-sm text-textMuted">Yahoo Finance 가격 데이터와 기준 주식 수로 주요 방산 기업 시장 가치를 추정합니다.</p>
+            <p className="mt-2 max-w-3xl text-sm text-textMuted">Finnhub 실시간 quote를 우선 사용하고, 연결 실패 시 Yahoo Finance 가격 데이터와 기준 주식 수로 주요 방산 기업 시장 가치를 추정합니다.</p>
           </div>
           <button onClick={loadData} className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-3 py-2 text-text hover:border-sky-400/60">
             <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />

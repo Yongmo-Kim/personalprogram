@@ -1,4 +1,5 @@
 import { defenseMarketCompanies } from '../data/defenseMarketCompanies';
+import { fetchFinnhubQuoteMap, hasFinnhubPrice } from './finnhubMarketClient';
 
 const YAHOO_CHART_BASE = '/yahoo-finance/v8/finance/chart';
 
@@ -66,11 +67,14 @@ const makeFallback = (company, index, fx) => {
   };
 };
 
-const makeSnapshot = (company, result, fx) => {
+const makeSnapshot = (company, result, finnhubQuote, fx) => {
   const meta = result.meta || {};
   const points = getPoints(result);
-  const price = meta.regularMarketPrice || points.at(-1)?.close || 0;
-  const previousPrice = meta.previousClose || meta.chartPreviousClose || points.at(-2)?.close || price;
+  const hasFinnhub = hasFinnhubPrice(finnhubQuote);
+  const price = hasFinnhub ? finnhubQuote.c : meta.regularMarketPrice || points.at(-1)?.close || 0;
+  const previousPrice = hasFinnhub && Number.isFinite(finnhubQuote.pc) && finnhubQuote.pc > 0
+    ? finnhubQuote.pc
+    : meta.previousClose || meta.chartPreviousClose || points.at(-2)?.close || price;
   const currency = meta.currency || company.currency;
   const marketCapLocal = price * company.sharesOutstanding;
   return {
@@ -82,23 +86,38 @@ const makeSnapshot = (company, result, fx) => {
     marketCapUsd: toUsd(marketCapLocal, currency, fx),
     points: points.slice(-60),
     timezone: meta.exchangeTimezoneName,
+    priceSource: hasFinnhub ? 'Finnhub' : 'Yahoo Finance',
     isFallback: false,
   };
 };
 
 export const fetchDefenseMarketData = async () => {
+  let finnhubQuoteMap = new Map();
+  let finnhubFailed = false;
+  try {
+    finnhubQuoteMap = await fetchFinnhubQuoteMap(defenseMarketCompanies.map((company) => company.symbol));
+  } catch {
+    finnhubFailed = true;
+  }
   const fx = {
     usdKrw: await fetchFx('KRW=X', 1350),
     eurUsd: await fetchFx('EURUSD=X', 1.08),
     gbpUsd: await fetchFx('GBPUSD=X', 1.25),
   };
   const settled = await Promise.allSettled(
-    defenseMarketCompanies.map(async (company) => makeSnapshot(company, await fetchChart(company.symbol), fx))
+    defenseMarketCompanies.map(async (company) => makeSnapshot(company, await fetchChart(company.symbol), finnhubQuoteMap.get(company.symbol), fx))
   );
   const companies = settled
     .map((item, index) => (item.status === 'fulfilled' ? item.value : makeFallback(defenseMarketCompanies[index], index, fx)))
     .sort((a, b) => b.marketCapUsd - a.marketCapUsd);
-  return { companies, fx, hasFallback: companies.some((company) => company.isFallback), lastUpdated: new Date().toISOString() };
+  return {
+    companies,
+    fx,
+    hasFallback: companies.some((company) => company.isFallback),
+    finnhubFailed,
+    provider: finnhubQuoteMap.size ? 'Finnhub + Yahoo Finance fallback' : 'Yahoo Finance fallback',
+    lastUpdated: new Date().toISOString(),
+  };
 };
 
 export const buildDefenseMarketSeries = (companies, selectedIds) => {

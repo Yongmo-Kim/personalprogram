@@ -175,7 +175,7 @@ export const SemiMarketValue = () => {
             </div>
             <h2 className="mt-2 text-3xl font-bold text-text">반도체 시장 가치</h2>
             <p className="mt-2 max-w-3xl text-sm leading-relaxed text-textMuted">
-              Yahoo Finance 1일 차트 가격을 기준으로 주요 반도체 기업의 시장 가치 흐름을 추정합니다. 시가총액은 실시간 가격과 기준 주식 수를 곱해 계산한 값입니다.
+              Finnhub 실시간 quote를 우선 사용하고, 연결 실패 시 Yahoo Finance 1일 차트로 자동 전환해 주요 반도체 기업의 시장 가치 흐름을 추정합니다.
             </p>
           </div>
 
